@@ -1,0 +1,80 @@
+Great question!
+
+```ts
+void bootstrap();
+```
+
+This is **not** defining the function — it's **calling** the `bootstrap` function and using `void` before it.
+
+---
+
+## ✅ What does `void bootstrap()` mean in this context?
+
+It means:
+
+> "Call the `bootstrap()` function, and intentionally ignore any returned value, especially if it returns a Promise."
+
+---
+
+### 🧠 Why use `void`?
+
+In NestJS and other async TypeScript setups, your `bootstrap()` function is typically `async`. For example:
+
+```ts
+async function bootstrap() {
+  await app.listen(3000);
+}
+```
+
+If you just call it like:
+
+```ts
+bootstrap();
+```
+
+Then **any unhandled errors inside the async function** could get lost or trigger a warning like:
+
+> "Unhandled promise rejection."
+
+Using:
+
+```ts
+void bootstrap();
+```
+
+means:
+
+> "I’m intentionally not awaiting this async function — I’m discarding its Promise — and I won’t handle its result."
+
+---
+
+### ⚠️ Without `void`, TypeScript or linters might warn:
+
+If you're using ESLint with `@typescript-eslint/no-floating-promises`, it will warn if you call an async function without `await` or `void`.
+
+---
+
+## ✅ Summary
+
+| Code                 | Meaning                                                 |
+| -------------------- | ------------------------------------------------------- |
+| `bootstrap();`       | Call it, but maybe unsafe if it's async.                |
+| `await bootstrap();` | Wait for it to finish — must be in an async function.   |
+| `void bootstrap();`  | Call it and **explicitly ignore** the returned Promise. |
+
+---
+
+### 🚀 NestJS recommends:
+
+```ts
+// main.ts
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  await app.listen(3000);
+}
+void bootstrap();
+```
+
+So you're safe from unhandled promise errors and satisfy ESLint rules.
+
+Let me know if you want to handle errors explicitly (e.g., with a try/catch in `bootstrap`).
